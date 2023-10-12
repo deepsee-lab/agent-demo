@@ -49,7 +49,7 @@ document_generation_tool = Tool.from_function(
 email_tool = StructuredTool.from_function(
     func=send_email,
     name="SendEmail",
-    description="给指定的邮箱发送邮件。确保邮箱地址是xxx@xxx.xxx的格式",
+    description="给指定的邮箱发送邮件。确保邮箱地址是xxx@xxx.xxx的格式。多个邮箱地址以';'分割。",
 )
 
 excel_inspection_tool = StructuredTool.from_function(
