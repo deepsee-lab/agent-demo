@@ -16,7 +16,7 @@ class ExcelAnalyser:
 
         """分析一个结构化文件（例如excel文件）的内容。"""
 
-        columns = get_column_names(filename)
+        #columns = get_column_names(filename)
         inspections = get_first_n_rows(filename, 3)
 
         chain = LLMChain(
@@ -32,7 +32,6 @@ class ExcelAnalyser:
         response = chain.run(
             query=query,
             filename=filename,
-            columns=columns,
             inspections=inspections
         )
 

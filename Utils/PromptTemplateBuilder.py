@@ -7,11 +7,31 @@ from langchain.prompts import load_prompt
 import os, json
 import tempfile
 
-from langchain_core.prompts import PipelinePromptTemplate
+from langchain_core.prompts import PipelinePromptTemplate, BasePromptTemplate
 
-from .PrintUtils import chinese_friendly
-from .FileUtils import load_file
 from AutoAgent.Action import Action
+
+
+def chinese_friendly(string) -> str:
+    lines = string.split('\n')
+    for i, line in enumerate(lines):
+        if line.startswith('{') and line.endswith('}'):
+            try:
+                lines[i] = json.dumps(json.loads(line), ensure_ascii=False)
+            except:
+                pass
+    return '\n'.join(lines)
+
+
+def load_file(filename: str) -> str:
+    """Loads a file into a string."""
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"File {filename} not found.")
+    f = open(filename, 'r', encoding='utf-8')
+    s = f.read()
+    f.close()
+    return s
+
 
 class PromptTemplateBuilder:
     def __init__(
@@ -25,7 +45,7 @@ class PromptTemplateBuilder:
     def _get_tools_prompt(self, tools: List[BaseTool]) -> str:
         tools_prompt = ""
         for i, tool in enumerate(tools):
-            prompt = f"{i+1}. {tool.name}: {tool.description}, \
+            prompt = f"{i + 1}. {tool.name}: {tool.description}, \
                         args json schema: {json.dumps(tool.args, ensure_ascii=False)}\n"
             tools_prompt += prompt
         return tools_prompt
@@ -53,7 +73,7 @@ class PromptTemplateBuilder:
             self,
             tools: Optional[List[BaseTool]] = None,
             output_parser: Optional[BaseOutputParser] = None,
-    ) -> PromptTemplate:
+    ) -> BasePromptTemplate:
 
         main_file = os.path.join(self.prompt_path, self.prompt_file)
         main_prompt_template = load_prompt(
@@ -63,14 +83,14 @@ class PromptTemplateBuilder:
         partial_variables = {}
         recursive_templates = []
 
-        #遍历所有变量，检查是否存在对应的模板文件
+        # 遍历所有变量，检查是否存在对应的模板文件
         for var in variables:
             # 是否存在嵌套模板
             if os.path.exists(os.path.join(self.prompt_path, f"{var}.json")):
                 sub_template = PromptTemplateBuilder(
                     self.prompt_path, f"{var}.json"
                 ).build(tools=tools, output_parser=output_parser)
-                recursive_templates.append((var,sub_template))
+                recursive_templates.append((var, sub_template))
             # 是否存在文本文件
             elif os.path.exists(os.path.join(self.prompt_path, f"{var}.txt")):
                 var_str = load_file(os.path.join(self.prompt_path, f"{var}.txt"))

@@ -17,10 +17,7 @@ print("我需要知道____的值，才能生成代码。请完善你的查询。
 给定文件为：
 {filename}
 
-文件列名为：
-{columns}
-
-文件前3行为：
+文件内容样例：
 {inspections}
 
 你输出的Python代码前后必须有markdown标识符，如下所示：

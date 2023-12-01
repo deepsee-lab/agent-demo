@@ -56,15 +56,21 @@ class AutoGPT:
               task_description,
               short_term_memory,
               long_term_memory,
+              verbose=False
         ) -> Tuple[Action, str]:
 
         """执行一步思考"""
-        response = reason_chain.invoke({
-            "short_term_memory": short_term_memory.load_memory_variables({})["history"],
-            "long_term_memory" : long_term_memory.load_memory_variables(
-                {"prompt": task_description}
-            )["history"] if long_term_memory is not None else "",
-        })
+
+        response = ""
+        for s in reason_chain.stream({
+                "short_term_memory": short_term_memory.load_memory_variables({})["history"],
+                "long_term_memory" : long_term_memory.load_memory_variables(
+                    {"prompt": task_description}
+                )["history"] if long_term_memory is not None else "",
+            }):
+            if verbose:
+                color_print(s, THOUGHT_COLOR, end="")
+            response += s
 
         action = self.robust_parser.parse(response)
         return (action, response)
@@ -168,22 +174,20 @@ class AutoGPT:
                 task_description=task_description,
                 short_term_memory=short_term_memory,
                 long_term_memory=long_term_memory,
+                verbose=verbose,
             )
 
             if action.name == "FINISH":
                 if verbose:
-                    color_print(f"----\nFINISH",OBSERVATION_COLOR)
+                    color_print(f"\n----\nFINISH",OBSERVATION_COLOR)
 
                 reply = self._final_step(short_term_memory, task_description)
                 break
 
-            if verbose:
-                color_print(response, THOUGHT_COLOR)
-
             observation = self._exec_action(action)
 
             if verbose:
-                color_print(f"----\n结果:\n{observation}",OBSERVATION_COLOR)
+                color_print(f"\n----\n结果:\n{observation}",OBSERVATION_COLOR)
 
             # 保存到短时记忆
             short_term_memory.save_context(
