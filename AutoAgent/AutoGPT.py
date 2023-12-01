@@ -18,7 +18,7 @@ class AutoGPT:
 
     def __init__(
             self,
-            llm: BaseLLM | BaseChatModel,
+            llm: BaseLLM,
             prompts_path: str,
             tools: List[BaseTool],
             work_dir: str = "./data",
