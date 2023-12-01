@@ -1,5 +1,5 @@
-## 第一步：设置 api_keys.env
-把项目中的 api_keys.env 里面的 OPENAI_API_KEY 配置为自己的
+## 第一步：设置 .env
+把项目中的 .env 里面的 OPENAI_API_KEY 配置为自己的
 
 ```
 OPENAI_API_KEY=sk-xxxx
