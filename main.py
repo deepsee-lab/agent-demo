@@ -1,6 +1,6 @@
-from dotenv import load_dotenv
-
-load_dotenv("api_keys.env")  # 从环境变量中加载 API keys，必须在所有 import 之前
+# 加载环境变量
+from dotenv import load_dotenv, find_dotenv
+_ = load_dotenv(find_dotenv())
 
 from AutoAgent.AutoGPT import AutoGPT
 from langchain.chat_models import ChatOpenAI
@@ -26,13 +26,13 @@ def launch_agent(agent: AutoGPT):
 
 def main():
 
-    prompts_path = "./prompts"
-
     # 语言模型
     llm = ChatOpenAI(
-        model="gpt-4",
+        model="gpt-4-1106-preview",
         temperature=0,
-        model_kwargs={"top_p": 1 / 100255},
+        model_kwargs={
+            "seed": 42
+        },
     )
 
     # 存储长时记忆的向量数据库
@@ -41,8 +41,6 @@ def main():
 
     # 自定义工具集
     tools = [
-        calculator_tool,
-        calendar_tool,
         document_qa_tool,
         document_generation_tool,
         email_tool,
@@ -56,17 +54,18 @@ def main():
 
     # 添加Excel分析工具
     tools += [ExcelAnalyser(
-        prompts_path=prompts_path
+        prompts_path="./prompts/tools",
+        prompt_file="excel_analyser.json"
     ).as_tool()]
 
     # 定义智能体
     agent = AutoGPT(
         llm=llm,
-        prompts_path=prompts_path,
+        prompts_path="./prompts/main",
         tools=tools,
         work_dir="./data",
-        main_prompt_file="main.templ",
-        final_prompt_file="final.templ",
+        main_prompt_file="main.json",
+        final_prompt_file="final_step.json",
         max_thought_steps=20,
         memery_retriever=retriever
     )

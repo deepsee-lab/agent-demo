@@ -47,7 +47,12 @@ def ask_docment(
         return "无法读取文档内容"
     db = Chroma.from_documents(documents, OpenAIEmbeddings(model="text-embedding-ada-002"))
     qa_chain = RetrievalQA.from_chain_type(
-        llm=OpenAI(temperature=0),  # 语言模型
+        llm=OpenAI(
+            temperature=0,
+            model_kwargs={
+                "seed": 42
+            },
+        ),  # 语言模型
         chain_type="stuff",  # prompt的组织方式，后面细讲
         retriever=db.as_retriever()  # 检索器
     )

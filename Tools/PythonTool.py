@@ -9,8 +9,8 @@ from .ExcelTool import get_first_n_rows, get_column_names
 
 class ExcelAnalyser:
 
-    def __init__(self, prompts_path):
-        self.prompt = PromptTemplateBuilder(prompts_path, "excel_analyser.templ").build()
+    def __init__(self, prompts_path, prompt_file="excel_analyser.json"):
+        self.prompt = PromptTemplateBuilder(prompts_path, prompt_file).build()
 
     def analyse(self, query, filename):
 
@@ -19,7 +19,16 @@ class ExcelAnalyser:
         columns = get_column_names(filename)
         inspections = get_first_n_rows(filename, 3)
 
-        chain = LLMChain(llm=ChatOpenAI(model="gpt-4", temperature=0), prompt=self.prompt)
+        chain = LLMChain(
+            llm=ChatOpenAI(
+                model="gpt-4-1106-preview",
+                temperature=0,
+                model_kwargs={
+                    "seed": 42
+                },
+            ),
+            prompt=self.prompt
+        )
         response = chain.run(
             query=query,
             filename=filename,

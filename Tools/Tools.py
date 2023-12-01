@@ -4,34 +4,12 @@ from pydantic import Field
 
 warnings.filterwarnings("ignore")
 from langchain.agents import Tool
-from py_expression_eval import Parser
 from langchain.tools import StructuredTool
-from langchain.tools import tool
-from ctparse import ctparse
 from .FileQATool import ask_docment
 from .WriterTool import writer_chain
 from .EmailTool import send_email
 from .ExcelTool import get_first_n_rows, get_column_names
 
-@tool("Calendar")
-def calendar_tool(
-        date_exp: str = Field(description="Date expression to be parsed. It must be in English."),
-) -> str:
-    """用于查询和计算日期/时间"""
-    res = ctparse(date_exp)
-    date = res.resolution
-    return date.dt.strftime("%c")
-
-def evaluate(expr: str) -> str:
-    parser = Parser()
-    return str(parser.parse(expr).evaluate({}))
-
-
-calculator_tool = Tool.from_function(
-    func=evaluate,
-    name="Calculator",
-    description="用于计算一个数学表达式的值",
-)
 
 
 document_qa_tool = StructuredTool.from_function(
