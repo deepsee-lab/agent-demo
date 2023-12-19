@@ -23,5 +23,7 @@ jobs:
         port: ${{ secrets.PORT }}
         script: |
             sudo su -
+            git config --global --add safe.directory /home/wwwroot/code/auto-gpt-work
+            git config --global --add safe.directory /home/wwwroot/code/lecture-notes
             sh /home/wwwroot/code/update-lecture-notes.sh
 
