@@ -3,9 +3,8 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 
 from AutoAgent.AutoGPT import AutoGPT
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from Tools import *
 from Tools.PythonTool import ExcelAnalyser
@@ -45,18 +44,14 @@ def main():
         document_generation_tool,
         email_tool,
         excel_inspection_tool,
+        directory_inspection_tool,
+        finish_placeholder,
+        ExcelAnalyser(
+            prompts_path="./prompts/tools",
+            prompt_file="excel_analyser.json",
+            verbose=True
+        ).as_tool()
     ]
-
-    # 添加文件管理工具
-    tools += FileManagementToolkit(
-        root_dir="."
-    ).get_tools()
-
-    # 添加Excel分析工具
-    tools += [ExcelAnalyser(
-        prompts_path="./prompts/tools",
-        prompt_file="excel_analyser.json"
-    ).as_tool()]
 
     # 定义智能体
     agent = AutoGPT(

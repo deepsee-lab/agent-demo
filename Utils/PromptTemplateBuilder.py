@@ -4,15 +4,16 @@ from langchain.tools.base import BaseTool
 from langchain.schema.output_parser import BaseOutputParser
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import load_prompt
+from langchain.tools.render import render_text_description
 import os, json
 import tempfile
 
 from langchain_core.prompts import PipelinePromptTemplate, BasePromptTemplate
+from langchain_core.tools import Tool
 
 from AutoAgent.Action import Action
 
-
-def chinese_friendly(string) -> str:
+def _chinese_friendly(string) -> str:
     lines = string.split('\n')
     for i, line in enumerate(lines):
         if line.startswith('{') and line.endswith('}'):
@@ -23,7 +24,7 @@ def chinese_friendly(string) -> str:
     return '\n'.join(lines)
 
 
-def load_file(filename: str) -> str:
+def _load_file(filename: str) -> str:
     """Loads a file into a string."""
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File {filename} not found.")
@@ -31,6 +32,15 @@ def load_file(filename: str) -> str:
     s = f.read()
     f.close()
     return s
+
+
+def _get_tools_prompt(tools: List[BaseTool]) -> str:
+    tools_prompt = ""
+    for i, tool in enumerate(tools):
+        prompt = f"{i + 1}. {tool.name}: {tool.description}, \
+                    args json schema: {json.dumps(tool.args, ensure_ascii=False)}\n"
+        tools_prompt += prompt
+    return tools_prompt
 
 
 class PromptTemplateBuilder:
@@ -41,14 +51,6 @@ class PromptTemplateBuilder:
     ):
         self.prompt_path = prompt_path
         self.prompt_file = prompt_file
-
-    def _get_tools_prompt(self, tools: List[BaseTool]) -> str:
-        tools_prompt = ""
-        for i, tool in enumerate(tools):
-            prompt = f"{i + 1}. {tool.name}: {tool.description}, \
-                        args json schema: {json.dumps(tool.args, ensure_ascii=False)}\n"
-            tools_prompt += prompt
-        return tools_prompt
 
     def _check_or_redirect(self, prompt_file: str) -> str:
         with open(prompt_file, "r", encoding="utf-8") as f:
@@ -93,15 +95,15 @@ class PromptTemplateBuilder:
                 recursive_templates.append((var, sub_template))
             # 是否存在文本文件
             elif os.path.exists(os.path.join(self.prompt_path, f"{var}.txt")):
-                var_str = load_file(os.path.join(self.prompt_path, f"{var}.txt"))
+                var_str = _load_file(os.path.join(self.prompt_path, f"{var}.txt"))
                 partial_variables[var] = var_str
 
         if tools is not None and "tools" in variables:
-            tools_prompt = self._get_tools_prompt(tools)
+            tools_prompt = render_text_description(tools)  #_get_tools_prompt(tools)
             partial_variables["tools"] = tools_prompt
 
         if output_parser is not None and "format_instructions" in variables:
-            partial_variables["format_instructions"] = chinese_friendly(
+            partial_variables["format_instructions"] = _chinese_friendly(
                 output_parser.get_format_instructions()
             )
 
@@ -121,13 +123,12 @@ class PromptTemplateBuilder:
 if __name__ == "__main__":
     builder = PromptTemplateBuilder("../prompts/main", "main.json")
     output_parser = PydanticOutputParser(pydantic_object=Action)
-    prompt_template = builder.build(tools=[], output_parser=output_parser)
+    prompt_template = builder.build(tools=[
+        Tool(name="FINISH", func=lambda: None, description="任务完成")
+    ], output_parser=output_parser)
     print(prompt_template.format(
-        ai_name="瓜瓜",
-        ai_role="智能助手机器人",
         task_description="解决问题",
         work_dir=".",
         short_term_memory="",
         long_term_memory="",
-        tools="",
     ))

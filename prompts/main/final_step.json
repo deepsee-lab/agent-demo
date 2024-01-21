@@ -1,8 +1,6 @@
 {
     "_type": "prompt",
     "input_variables": [
-      "ai_name",
-      "ai_role",
       "task_description",
       "short_term_memory"
     ],

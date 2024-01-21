@@ -3,7 +3,7 @@ from colorama import init, Fore, Back, Style
 THOUGHT_COLOR = Fore.GREEN
 OBSERVATION_COLOR = Fore.YELLOW
 ROUND_COLOR = Fore.BLUE
-
+CODE_COLOR = Fore.WHITE
 
 def color_print(text, color=None, end="\n"):
     if color is not None:

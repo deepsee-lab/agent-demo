@@ -3,7 +3,7 @@ import urllib.parse
 import re
 
 
-def is_valid_email(email: str) -> bool:
+def _is_valid_email(email: str) -> bool:
     receivers = email.split(';')
     # 正则表达式匹配电子邮件
     pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
@@ -21,7 +21,7 @@ def send_email(
 ) -> str:
     """给指定的邮箱发送邮件"""
 
-    if not is_valid_email(to):
+    if not _is_valid_email(to):
         return f"电子邮件地址 {to} 不合法"
 
     # 对邮件的主题和正文进行URL编码
