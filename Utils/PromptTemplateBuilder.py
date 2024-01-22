@@ -13,6 +13,7 @@ from langchain_core.tools import Tool
 
 from AutoAgent.Action import Action
 
+
 def _chinese_friendly(string) -> str:
     lines = string.split('\n')
     for i, line in enumerate(lines):
@@ -32,15 +33,6 @@ def _load_file(filename: str) -> str:
     s = f.read()
     f.close()
     return s
-
-
-def _get_tools_prompt(tools: List[BaseTool]) -> str:
-    tools_prompt = ""
-    for i, tool in enumerate(tools):
-        prompt = f"{i + 1}. {tool.name}: {tool.description}, \
-                    args json schema: {json.dumps(tool.args, ensure_ascii=False)}\n"
-        tools_prompt += prompt
-    return tools_prompt
 
 
 class PromptTemplateBuilder:
@@ -99,7 +91,7 @@ class PromptTemplateBuilder:
                 partial_variables[var] = var_str
 
         if tools is not None and "tools" in variables:
-            tools_prompt = render_text_description(tools)  #_get_tools_prompt(tools)
+            tools_prompt = render_text_description(tools)  # _get_tools_prompt(tools)
             partial_variables["tools"] = tools_prompt
 
         if output_parser is not None and "format_instructions" in variables:
