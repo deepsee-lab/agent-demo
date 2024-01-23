@@ -39,4 +39,4 @@ def send_email(
 
     webbrowser.open(mailto_url)
 
-    return f"已发送邮件给 {to}, 标题: {subject}"
+    return f"状态: 成功\n备注: 已发送邮件给 {to}, 标题: {subject}"

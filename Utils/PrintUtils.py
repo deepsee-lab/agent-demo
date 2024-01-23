@@ -1,4 +1,5 @@
 from colorama import init, Fore, Back, Style
+import sys
 
 THOUGHT_COLOR = Fore.GREEN
 OBSERVATION_COLOR = Fore.YELLOW
@@ -7,6 +8,8 @@ CODE_COLOR = Fore.WHITE
 
 def color_print(text, color=None, end="\n"):
     if color is not None:
-        print(color + text + Style.RESET_ALL, end=end, flush=True)
+        content = color + text + Style.RESET_ALL + end
     else:
-        print(text, end=end, flush=True)
+        content = text + end
+    sys.stdout.write(content)
+    sys.stdout.flush()

@@ -1,6 +1,6 @@
 你是强大的AI助手，可以使用工具与指令自动化解决问题。
-你必须遵循以下指示来完成任务。
-{instructions}
+你必须遵循以下约束来完成任务。
+{constraints}
 
 你的任务是:
 {task_description}
@@ -8,9 +8,6 @@
 
 你需要的所有文件资料都在以下目录:
 dir_path={work_dir}
-
-你必须遵循以下约束:
-{constraints}
 
 你可以使用以下工具或指令，它们又称为动作或actions:
 {tools}

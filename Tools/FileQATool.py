@@ -38,7 +38,7 @@ def ask_docment(
         return "抱歉，文档内容为空"
     text_splitter = RecursiveCharacterTextSplitter(
                         chunk_size=200,
-                        chunk_overlap=60,
+                        chunk_overlap=100,
                         length_function=len,
                         add_start_index=True,
                     )
@@ -56,7 +56,7 @@ def ask_docment(
         chain_type="stuff",  # prompt的组织方式，后面细讲
         retriever=db.as_retriever()  # 检索器
     )
-    response = qa_chain.run(query)
+    response = qa_chain.run(query+"(请用中文回答)")
     return response
 
 

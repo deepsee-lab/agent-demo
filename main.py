@@ -8,7 +8,6 @@ from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from Tools import *
 from Tools.PythonTool import ExcelAnalyser
-from langchain.agents.agent_toolkits import FileManagementToolkit
 
 
 def launch_agent(agent: AutoGPT):
@@ -36,7 +35,9 @@ def main():
 
     # 存储长时记忆的向量数据库
     db = Chroma.from_documents([Document(page_content="")], OpenAIEmbeddings(model="text-embedding-ada-002"))
-    retriever = db.as_retriever(search_kwargs=dict(k=1))
+    retriever = db.as_retriever(
+        search_kwargs={"k": 1}
+    )
 
     # 自定义工具集
     tools = [
