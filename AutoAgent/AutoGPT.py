@@ -48,8 +48,9 @@ class AutoGPT:
         self.max_thought_steps = max_thought_steps
         self.memery_retriever = memery_retriever
 
-        # OutputFixingParser： 如果输出格式不正确，尝试修复
+        # 可以使用这个parser解析出Action json对象，就用去调用 tool
         self.output_parser = PydanticOutputParser(pydantic_object=Action)
+        # OutputFixingParser： 如果输出格式不正确，尝试修复
         self.robust_parser = OutputFixingParser.from_llm(parser=self.output_parser, llm=self.llm)
 
         self.main_prompt_file = main_prompt_file
@@ -68,8 +69,7 @@ class AutoGPT:
               long_term_memory,
               verbose=False
               ) -> Tuple[Action, str]:
-
-        """执行一步思考"""
+        """执行一步思考，返回的是一个 Action对象和返回结果"""
 
         response = ""
         for s in reason_chain.stream({
@@ -123,7 +123,9 @@ class AutoGPT:
         return observation
 
     def run(self, task_description, verbose=False) -> str:
-        thought_step_count = 0  # 思考步数
+        """task_description: 任务描述，用户输入"""
+        # 思考步数
+        thought_step_count = 0  
 
         # 初始化模板
         prompt_template = PromptTemplateBuilder(
@@ -137,6 +139,7 @@ class AutoGPT:
             task_description=task_description,
         )
 
+        # 短期记忆及初始化
         short_term_memory = ConversationTokenBufferMemory(
             llm=self.llm,
             max_token_limit=4000,
@@ -158,12 +161,15 @@ class AutoGPT:
         else:
             long_term_memory = None
 
+        # 最终的回复
         reply = ""
 
+        # agent 思考逻辑
         while thought_step_count < self.max_thought_steps:
             if verbose:
                 color_print(f">>>>Round: {thought_step_count}<<<<", ROUND_COLOR)
 
+            # 每一步的思考逻辑
             action, response = self._step(
                 chain,
                 task_description=task_description,
